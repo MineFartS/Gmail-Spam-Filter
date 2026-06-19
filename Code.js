@@ -1,4 +1,7 @@
-function containsAny(input, values) {
+
+const prop = PropertiesService.getScriptProperties();
+
+const containsAny = (input, values) => {
 
   let value
 
@@ -16,56 +19,53 @@ function containsAny(input, values) {
 
 }
 
-let label = GmailApp.getUserLabelByName("Phil's Spam Filter")
-if (label == undefined) {
-  label = GmailApp.createLabel("Phil's Spam Filter")
-}
-
-function loop() {
-  
-  for (x=0; x<100; x++) {
-    main()
-  }
-
-}
+let label = GmailApp.getUserLabelByName("Phil's Spam Filter") 
+  ?? GmailApp.createLabel("Phil's Spam Filter");
 
 function main() {
 
-  const threads = GmailApp.getInboxThreads()
+  var startIdx = parseInt(prop.getProperty('startIndex')) || 0;
 
-  let x, t, email, args, subject
+  while (true) {
 
-  for (x in threads) {
-
-    t = threads[x]
+    Logger.log('Starting at startIdx: '+startIdx);
+    threads = GmailApp.getInboxThreads(startIdx, 50);
     
-    email = t.getMessages()[0].getFrom()
-    subject = t.getFirstMessageSubject()
+    for (i=0; i<threads.length; i++) {
+      
+      var t = threads[i];
+      
+      var email = t.getMessages()[0].getFrom();
+      var subject = t.getFirstMessageSubject();
 
-    if (email.includes('<')) {
-      email = email.split('<')[1].split('>')[0]
+      if (email.includes('<')) {
+        email = email.split('<')[1].split('>')[0]
+      }
+
+      let pos_email = containsAny(email, keywords.positive.email)
+      let pos_subject = containsAny(subject, keywords.positive.subject)
+      let neg_email = containsAny(email, keywords.negative.email)
+      let neg_subject = containsAny(subject, keywords.negative.subject)
+
+      if ((pos_email || pos_subject) && !(neg_email || neg_subject)) {
+
+        Logger.log(subject)
+
+        t.moveToArchive()
+        t.addLabel(label)
+
+      }
+
     }
-
-    args = {
-
-      'pos_email' : containsAny(email, keywords.positive.email),
-      'pos_subject' : containsAny(subject, keywords.positive.subject),
-
-      'neg_email' : containsAny(email, keywords.negative.email),
-      'neg_subject' : containsAny(subject, keywords.negative.subject)
-
-    }
-
-    if ((args.pos_email || args.pos_subject) && !(args.neg_email || args.neg_subject)) {
-
-      Logger.log(subject)
-
-      t.moveToArchive()
-
-      t.addLabel(label)
-
-    }
+    
+    startIdx += threads.length;
+    prop.setProperty('startIndex', startIdx.toString());
 
   }
+
+
+  // If complete, reset the start index to 0 for future runs
+  prop.setProperty('startIndex', '0');
+  Logger.log('Finished processing all inbox threads!');
 
 }
