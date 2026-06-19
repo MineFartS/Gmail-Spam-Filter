@@ -73,7 +73,15 @@ const keywords = {
       'suggested',
       'next level',
       '(',
-      'perks'
+      'perks',
+      'YouTube removed your content',
+      'Update your username by',
+      'Video is blocked:',
+      'Video cannot be monetized:',
+      'Summary of',
+      'get started',
+      'free',
+      'welcome'
     ]
   },
 
@@ -82,7 +90,10 @@ const keywords = {
     'email' : [
       '@gmail.com',
       '@hotmail.com',
-      '@outlook.com'
+      '@outlook.com',
+      '.gov',
+      'familysafety@microsoft.com',
+      '@txt.voice.google.com'
     ],
 
     'subject' : [
@@ -93,7 +104,10 @@ const keywords = {
       'security',
       'important',
       'recover',
-      'required'
+      'required',
+      'delete',
+      'ready to download',
+      'password'
     ]
   }
 
